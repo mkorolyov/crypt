@@ -1,4 +1,4 @@
-.PHONY: gen
+.PHONY: compile test
 
 compile:
 	go build -v ./...
