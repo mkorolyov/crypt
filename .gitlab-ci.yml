@@ -13,6 +13,9 @@ stages:
   - test
   - build
 
+before_script:
+  - export GO111MODULE=on
+
 unit_tests:
   stage: test
   script:
