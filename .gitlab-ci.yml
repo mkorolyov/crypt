@@ -1,0 +1,24 @@
+image: golang:1.12
+
+cache:
+  paths:
+    - /apt-cache
+    - /go/src/github.com
+    - /go/src/golang.org
+    - /go/src/google.golang.org
+    - /go/src/gopkg.in
+    - /go/src/humans.net
+
+stages:
+  - test
+  - build
+
+unit_tests:
+  stage: test
+  script:
+    - make test
+
+build:
+  stage: build
+  script:
+    - make compile
