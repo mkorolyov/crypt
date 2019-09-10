@@ -1,4 +1,4 @@
-module humans.net/lib/crypt
+module pkg.humans.net/lib/crypt
 
 go 1.12
 
