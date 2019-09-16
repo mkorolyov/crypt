@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/pbkdf2"
 )

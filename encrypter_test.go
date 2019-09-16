@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestRSAEncoder(t *testing.T) {

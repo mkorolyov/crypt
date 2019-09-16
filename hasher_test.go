@@ -1,8 +1,9 @@
 package crypt
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestPBKDF2Hasher_Hash(t *testing.T) {
