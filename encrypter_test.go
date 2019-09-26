@@ -24,7 +24,14 @@ func testGenerateKeyPair(t *testing.T, bits int) (*rsa.PrivateKey, *rsa.PublicKe
 
 	privkey, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
-		t.Fatalf("failed to generate rsa key pair: %v", err)
+		t.Fatalf("failed to generate rsa Key pair: %v", err)
 	}
 	return privkey, &privkey.PublicKey
+}
+
+func Test_test(t *testing.T) {
+	privateKey, publicKey := testGenerateKeyPair(t, 4096)
+	t.Logf("\n%s\n", string(privateKeyToBytes(privateKey)))
+	toBytes, _ := publicKeyToBytes(publicKey)
+	t.Logf("\n%s\n", string(toBytes))
 }
