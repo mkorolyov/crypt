@@ -31,7 +31,7 @@ func testGenerateKeyPair(t *testing.T, bits int) (*rsa.PrivateKey, *rsa.PublicKe
 
 func Test_test(t *testing.T) {
 	privateKey, publicKey := testGenerateKeyPair(t, 4096)
-	t.Logf("\n%s\n", string(privateKeyToBytes(privateKey)))
-	toBytes, _ := publicKeyToBytes(publicKey)
+	t.Logf("\n%s\n", string(PrivateKeyToBytes(privateKey)))
+	toBytes, _ := PublicKeyToBytes(publicKey)
 	t.Logf("\n%s\n", string(toBytes))
 }

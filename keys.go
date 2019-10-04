@@ -23,7 +23,7 @@ func (p *RSAPrivateKey) Decode(data interface{}) error {
 		return errors.Errorf("invalid rsa Key type: %T", data)
 	}
 
-	k, err := bytesToPrivateKey(key)
+	k, err := BytesToPrivateKey(key)
 	if err != nil {
 		return errors.Wrap(err, "failed to parse rsa Key")
 	}
@@ -31,8 +31,8 @@ func (p *RSAPrivateKey) Decode(data interface{}) error {
 	return nil
 }
 
-// bytesToPrivateKey parses rsa private Key from pem bytes
-func bytesToPrivateKey(pemBytes []byte) (*rsa.PrivateKey, error) {
+// BytesToPrivateKey parses rsa private Key from pem bytes
+func BytesToPrivateKey(pemBytes []byte) (*rsa.PrivateKey, error) {
 	block, err := getPemBlock(pemBytes)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse pem block for rsa private Key")
@@ -60,7 +60,7 @@ func (p *RSAPublicKey) Decode(data interface{}) error {
 		return errors.Errorf("invalid rsa Key type: %T", data)
 	}
 
-	k, err := bytesToPublicKey(key)
+	k, err := BytesToPublicKey(key)
 	if err != nil {
 		return errors.Wrap(err, "failed to parse rsa Key")
 	}
@@ -68,8 +68,8 @@ func (p *RSAPublicKey) Decode(data interface{}) error {
 	return nil
 }
 
-// bytesToPrivateKey parses rsa private Key from pem bytes
-func bytesToPublicKey(pemBytes []byte) (*rsa.PublicKey, error) {
+// BytesToPrivateKey parses rsa private Key from pem bytes
+func BytesToPublicKey(pemBytes []byte) (*rsa.PublicKey, error) {
 	block, err := getPemBlock(pemBytes)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse pem block for rsa public Key")
@@ -100,8 +100,8 @@ func getPemBlock(pemBytes []byte) ([]byte, error) {
 	return b, nil
 }
 
-// privateKeyToBytes private key to bytes
-func privateKeyToBytes(priv *rsa.PrivateKey) []byte {
+// PrivateKeyToBytes private key to bytes
+func PrivateKeyToBytes(priv *rsa.PrivateKey) []byte {
 	privBytes := pem.EncodeToMemory(
 		&pem.Block{
 			Type:  "RSA PRIVATE KEY",
@@ -113,7 +113,7 @@ func privateKeyToBytes(priv *rsa.PrivateKey) []byte {
 }
 
 // PublicKeyToBytes public key to bytes
-func publicKeyToBytes(pub *rsa.PublicKey) ([]byte, error) {
+func PublicKeyToBytes(pub *rsa.PublicKey) ([]byte, error) {
 	pubASN1, err := x509.MarshalPKIXPublicKey(pub)
 	if err != nil {
 		return nil, err

@@ -14,8 +14,12 @@ type RSADecrypter struct {
 
 // Decrypt decrypts given encrypted  data
 func (d *RSADecrypter) Decrypt(encrypted []byte) ([]byte, error) {
+	raw, err := base64Decode(encrypted)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to decode base64")
+	}
 	hash := sha512.New()
-	plain, err := rsa.DecryptOAEP(hash, rand.Reader, d.privateKey, encrypted, nil)
+	plain, err := rsa.DecryptOAEP(hash, rand.Reader, d.privateKey, raw, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to decrypt with private Key")
 	}
@@ -36,7 +40,7 @@ func (e *RSAEncoder) Encrypt(plain []byte) ([]byte, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to encrypt with public Key")
 	}
-	return encrypted, nil
+	return base64Encode(encrypted), nil
 }
 
 func NewRSADecrypter(privateKey *rsa.PrivateKey) *RSADecrypter {
