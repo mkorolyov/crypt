@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 
 	"github.com/pkg/errors"
 )
@@ -46,7 +47,7 @@ func BytesToPrivateKey(pemBytes []byte) (*rsa.PrivateKey, error) {
 }
 
 type RSAPublicKey struct {
-	key *rsa.PublicKey
+	Key *rsa.PublicKey
 }
 
 func (p *RSAPublicKey) Decode(data interface{}) error {
@@ -64,7 +65,7 @@ func (p *RSAPublicKey) Decode(data interface{}) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to parse rsa Key")
 	}
-	p.key = k
+	p.Key = k
 	return nil
 }
 
@@ -74,11 +75,21 @@ func BytesToPublicKey(pemBytes []byte) (*rsa.PublicKey, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse pem block for rsa public Key")
 	}
-	key, err := x509.ParsePKCS1PublicKey(block)
+
+	// var pk rsa.PublicKey
+	// if _, err := asn1.Unmarshal(block, &pk); err != nil {
+	// 	return nil, err
+	// }
+	// return &pk, nil
+	key, err := x509.ParsePKIXPublicKey(block)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse pkcs1 public Key")
 	}
-	return key, nil
+
+	if pk, ok := key.(*rsa.PublicKey); ok {
+		return pk, nil
+	}
+	return nil, fmt.Errorf("unknown key type %T", key)
 }
 
 func getPemBlock(pemBytes []byte) ([]byte, error) {
@@ -100,7 +111,7 @@ func getPemBlock(pemBytes []byte) ([]byte, error) {
 	return b, nil
 }
 
-// PrivateKeyToBytes private key to bytes
+// PrivateKeyToBytes private Key to bytes
 func PrivateKeyToBytes(priv *rsa.PrivateKey) []byte {
 	privBytes := pem.EncodeToMemory(
 		&pem.Block{
@@ -112,7 +123,7 @@ func PrivateKeyToBytes(priv *rsa.PrivateKey) []byte {
 	return privBytes
 }
 
-// PublicKeyToBytes public key to bytes
+// PublicKeyToBytes public Key to bytes
 func PublicKeyToBytes(pub *rsa.PublicKey) ([]byte, error) {
 	pubASN1, err := x509.MarshalPKIXPublicKey(pub)
 	if err != nil {

@@ -4,7 +4,7 @@ package crypt
 type Encoder interface {
 	Decrypter
 	// Encrypts encrypts given plain data
-	Encrypt(plain []byte) []byte
+	Encrypt(plain []byte) ([]byte, error)
 }
 
 type Decrypter interface {

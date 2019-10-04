@@ -20,7 +20,7 @@ type EncoderMock struct {
 	beforeDecryptCounter uint64
 	DecryptMock          mEncoderMockDecrypt
 
-	funcEncrypt          func(plain []byte) (ba1 []byte)
+	funcEncrypt          func(plain []byte) (ba1 []byte, err error)
 	inspectFuncEncrypt   func(plain []byte)
 	afterEncryptCounter  uint64
 	beforeEncryptCounter uint64
@@ -284,6 +284,7 @@ type EncoderMockEncryptParams struct {
 // EncoderMockEncryptResults contains results of the Encoder.Encrypt
 type EncoderMockEncryptResults struct {
 	ba1 []byte
+	err error
 }
 
 // Expect sets up expected params for Encoder.Encrypt
@@ -318,7 +319,7 @@ func (mmEncrypt *mEncoderMockEncrypt) Inspect(f func(plain []byte)) *mEncoderMoc
 }
 
 // Return sets up results that will be returned by Encoder.Encrypt
-func (mmEncrypt *mEncoderMockEncrypt) Return(ba1 []byte) *EncoderMock {
+func (mmEncrypt *mEncoderMockEncrypt) Return(ba1 []byte, err error) *EncoderMock {
 	if mmEncrypt.mock.funcEncrypt != nil {
 		mmEncrypt.mock.t.Fatalf("EncoderMock.Encrypt mock is already set by Set")
 	}
@@ -326,12 +327,12 @@ func (mmEncrypt *mEncoderMockEncrypt) Return(ba1 []byte) *EncoderMock {
 	if mmEncrypt.defaultExpectation == nil {
 		mmEncrypt.defaultExpectation = &EncoderMockEncryptExpectation{mock: mmEncrypt.mock}
 	}
-	mmEncrypt.defaultExpectation.results = &EncoderMockEncryptResults{ba1}
+	mmEncrypt.defaultExpectation.results = &EncoderMockEncryptResults{ba1, err}
 	return mmEncrypt.mock
 }
 
 //Set uses given function f to mock the Encoder.Encrypt method
-func (mmEncrypt *mEncoderMockEncrypt) Set(f func(plain []byte) (ba1 []byte)) *EncoderMock {
+func (mmEncrypt *mEncoderMockEncrypt) Set(f func(plain []byte) (ba1 []byte, err error)) *EncoderMock {
 	if mmEncrypt.defaultExpectation != nil {
 		mmEncrypt.mock.t.Fatalf("Default expectation is already set for the Encoder.Encrypt method")
 	}
@@ -360,13 +361,13 @@ func (mmEncrypt *mEncoderMockEncrypt) When(plain []byte) *EncoderMockEncryptExpe
 }
 
 // Then sets up Encoder.Encrypt return parameters for the expectation previously defined by the When method
-func (e *EncoderMockEncryptExpectation) Then(ba1 []byte) *EncoderMock {
-	e.results = &EncoderMockEncryptResults{ba1}
+func (e *EncoderMockEncryptExpectation) Then(ba1 []byte, err error) *EncoderMock {
+	e.results = &EncoderMockEncryptResults{ba1, err}
 	return e.mock
 }
 
 // Encrypt implements Encoder
-func (mmEncrypt *EncoderMock) Encrypt(plain []byte) (ba1 []byte) {
+func (mmEncrypt *EncoderMock) Encrypt(plain []byte) (ba1 []byte, err error) {
 	mm_atomic.AddUint64(&mmEncrypt.beforeEncryptCounter, 1)
 	defer mm_atomic.AddUint64(&mmEncrypt.afterEncryptCounter, 1)
 
@@ -384,7 +385,7 @@ func (mmEncrypt *EncoderMock) Encrypt(plain []byte) (ba1 []byte) {
 	for _, e := range mmEncrypt.EncryptMock.expectations {
 		if minimock.Equal(e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
-			return e.results.ba1
+			return e.results.ba1, e.results.err
 		}
 	}
 
@@ -400,7 +401,7 @@ func (mmEncrypt *EncoderMock) Encrypt(plain []byte) (ba1 []byte) {
 		if mm_results == nil {
 			mmEncrypt.t.Fatal("No results are set for the EncoderMock.Encrypt")
 		}
-		return (*mm_results).ba1
+		return (*mm_results).ba1, (*mm_results).err
 	}
 	if mmEncrypt.funcEncrypt != nil {
 		return mmEncrypt.funcEncrypt(plain)

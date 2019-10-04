@@ -26,6 +26,8 @@ func (d *RSADecrypter) Decrypt(encrypted []byte) ([]byte, error) {
 	return plain, nil
 }
 
+var _ Encoder = &RSAEncoder{}
+
 // RSAEncoder implements Encoder with RSA algorithm for encoding.
 // SHA512 used as hash function
 type RSAEncoder struct {
