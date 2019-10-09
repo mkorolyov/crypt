@@ -51,7 +51,7 @@ func (d *HybridDecrypter) Decrypt(encrypted []byte) ([]byte, error) {
 var _ Encrypter = &HybridEncrypter{}
 
 // HybridEncrypter implements Encrypter with RSA for encrypting AES key and AES-256 for encrypting raw data.
-// SHA256 used as hash function
+// SHA256 used as hash function for RSA
 type HybridEncrypter struct {
 	HybridDecrypter
 	publicKey *rsa.PublicKey
