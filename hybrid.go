@@ -33,17 +33,13 @@ func (d *HybridDecrypter) Decrypt(encrypted []byte) ([]byte, error) {
 		return nil, errors.Wrap(err, "failed to decrypt aes key with private Key")
 	}
 
-	block, err := aes.NewCipher(aesKey)
+	gcm, err := aesGCM(aesKey)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to build new aes cipher from key %s", string(aesKey))
-	}
-
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to build new gcm from aes cipher %+v", block)
+		return nil, err
 	}
 
 	textStart := aesKeyLength + gcm.NonceSize()
+	// cipherText[:0] reuses allocated slice
 	plainText, err := gcm.Open(cipherText[:0], cipherText[aesKeyLength:textStart], cipherText[textStart:], nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to decrypt aes data")
@@ -52,17 +48,17 @@ func (d *HybridDecrypter) Decrypt(encrypted []byte) ([]byte, error) {
 	return plainText, nil
 }
 
-var _ Encoder = &HybridEncoder{}
+var _ Encrypter = &HybridEncrypter{}
 
-// HybridEncoder implements Encoder with RSA for encrypting AES key and AES-256 for encrypting raw data.
+// HybridEncrypter implements Encrypter with RSA for encrypting AES key and AES-256 for encrypting raw data.
 // SHA256 used as hash function
-type HybridEncoder struct {
+type HybridEncrypter struct {
 	HybridDecrypter
 	publicKey *rsa.PublicKey
 }
 
 // Encrypts encrypts given plain data
-func (e *HybridEncoder) Encrypt(plain []byte) ([]byte, error) {
+func (e *HybridEncrypter) Encrypt(plain []byte) ([]byte, error) {
 	hash := sha256.New()
 
 	// 32 bytes for AES-256 encryption
@@ -75,14 +71,9 @@ func (e *HybridEncoder) Encrypt(plain []byte) ([]byte, error) {
 		return nil, fmt.Errorf("read only %d of 32 bytes from crypto/Rand", n)
 	}
 
-	block, err := aes.NewCipher(aesKey)
+	gcm, err := aesGCM(aesKey)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to build new aes cipher from key %s", string(aesKey))
-	}
-
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to build new gcm from aes cipher %+v", block)
+		return nil, err
 	}
 
 	nonce := make([]byte, gcm.NonceSize())
@@ -103,13 +94,25 @@ func (e *HybridEncoder) Encrypt(plain []byte) ([]byte, error) {
 	return base64Encode(append(encryptedAes, ciphed...)), nil
 }
 
-func NewRSADecrypter(privateKey *rsa.PrivateKey) *HybridDecrypter {
+func NewHybridDecrypter(privateKey *rsa.PrivateKey) *HybridDecrypter {
 	return &HybridDecrypter{privateKey: privateKey}
 }
 
-func NewRSAEncoder(privateKey *rsa.PrivateKey, publicKey *rsa.PublicKey) *HybridEncoder {
-	return &HybridEncoder{
+func NewHybridEncrypter(privateKey *rsa.PrivateKey, publicKey *rsa.PublicKey) *HybridEncrypter {
+	return &HybridEncrypter{
 		HybridDecrypter: HybridDecrypter{privateKey: privateKey},
 		publicKey:       publicKey,
 	}
+}
+
+func aesGCM(aesKey []byte) (cipher.AEAD, error) {
+	block, err := aes.NewCipher(aesKey)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to build new aes cipher from key %s", string(aesKey))
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to build new gcm from aes cipher %+v", block)
+	}
+	return gcm, nil
 }

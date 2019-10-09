@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRSAEncoder(t *testing.T) {
-	enc := NewRSAEncoder(testGenerateKeyPair(t, 2048))
+func TestHybridEncrypter(t *testing.T) {
+	enc := NewHybridEncrypter(testGenerateKeyPair(t, 2048))
 	plain := []byte("sensitive plain")
 	encoded, err := enc.Encrypt(plain)
 	require.NoError(t, err, "failed to encrypt")
