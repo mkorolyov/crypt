@@ -6,7 +6,6 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
-	"fmt"
 
 	"github.com/pkg/errors"
 )
@@ -63,12 +62,8 @@ func (e *HybridEncrypter) Encrypt(plain []byte) ([]byte, error) {
 
 	// 32 bytes for AES-256 encryption
 	aesKey := make([]byte, 32)
-	n, err := rand.Read(aesKey)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to read 32 bytes from crypto/Rand")
-	}
-	if n != 32 {
-		return nil, fmt.Errorf("read only %d of 32 bytes from crypto/Rand", n)
+	if err := fillRand(aesKey); err != nil {
+		return nil, errors.Wrapf(err, "failed to generate aes key")
 	}
 
 	gcm, err := aesGCM(aesKey)
@@ -77,19 +72,15 @@ func (e *HybridEncrypter) Encrypt(plain []byte) ([]byte, error) {
 	}
 
 	nonce := make([]byte, gcm.NonceSize())
-	n, err = rand.Read(nonce)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to read %d bytes from crypto/Rand for gcm nonce", gcm.NonceSize())
-	}
-	if n != gcm.NonceSize() {
-		return nil, fmt.Errorf("read only %d of %d bytes from crypto/Rand for gcm nonce", n, gcm.NonceSize())
+	if err := fillRand(nonce); err != nil {
+		return nil, errors.Wrapf(err, "failed to generate nonce for aes gcm cipher")
 	}
 
 	ciphed := gcm.Seal(nonce, nonce, plain, nil)
 
 	encryptedAes, err := rsa.EncryptOAEP(hash, rand.Reader, e.publicKey, aesKey, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to encrypt aes key with public Key")
+		return nil, errors.Wrap(err, "failed to encrypt aes key with public key")
 	}
 	return base64Encode(append(encryptedAes, ciphed...)), nil
 }
@@ -115,4 +106,16 @@ func aesGCM(aesKey []byte) (cipher.AEAD, error) {
 		return nil, errors.Wrapf(err, "failed to build new gcm from aes cipher %+v", block)
 	}
 	return gcm, nil
+}
+
+func fillRand(buffer []byte) error {
+	n, err := rand.Read(buffer)
+	bufLen := len(buffer)
+	if err != nil {
+		return errors.Wrapf(err, "failed to read %d bytes from crypto/Rand", bufLen)
+	}
+	if n != bufLen {
+		return errors.Errorf("read only %d of %d bytes from crypto/Rand", n, bufLen)
+	}
+	return nil
 }
