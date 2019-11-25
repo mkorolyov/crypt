@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/x509"
-	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -44,18 +42,6 @@ func Test_KeyConversion(t *testing.T) {
 	pubK, err := BytesToPublicKey(publicKeyBytes)
 	require.NoError(t, err, "failed to parse public key from bytes")
 	require.Equal(t, publicKey, pubK)
-}
-
-func PublicKeyFrom(key []byte) (*rsa.PublicKey, error) {
-	pubInterface, err := x509.ParsePKIXPublicKey(key)
-	if err != nil {
-		return nil, err
-	}
-	pub, ok := pubInterface.(*rsa.PublicKey)
-	if !ok {
-		return nil, errors.New("invalid public key")
-	}
-	return pub, nil
 }
 
 func Test_test(t *testing.T) {

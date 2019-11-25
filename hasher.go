@@ -35,7 +35,7 @@ var DefaultHasher Hasher = &PBKDF2Hasher{}
 
 // Hash hashes data with slow hash function pbkdf2 via base64.Encode(hashFn(globalSalt + randomSalt + plain))
 // Random salt with 8 bytes length appended to resulted encoded hash.
-func (_ PBKDF2Hasher) Hash(plain string, globalSalt []byte) (string, error) {
+func (PBKDF2Hasher) Hash(plain string, globalSalt []byte) (string, error) {
 	randomSalt, err := salt()
 	if err != nil {
 		return "", errors.Wrap(err, "failed to hash password")
@@ -47,7 +47,7 @@ func (_ PBKDF2Hasher) Hash(plain string, globalSalt []byte) (string, error) {
 }
 
 // VerifyHash verifies that passed auditee is the same as was hashed.
-func (_ PBKDF2Hasher) Verify(hashed, auditee string, globalSalt []byte) (bool, error) {
+func (PBKDF2Hasher) Verify(hashed, auditee string, globalSalt []byte) (bool, error) {
 	hashedBytes := []byte(hashed)
 	decodedHash, err := base64Decode(hashedBytes[saltLength:])
 	if err != nil {
