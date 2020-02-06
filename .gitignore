@@ -19,6 +19,7 @@
 # vendor/
 
 # -------------------- USER DEFINED --------------------
+/build
 
 *.pyc
 .idea/
