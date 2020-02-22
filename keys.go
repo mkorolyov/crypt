@@ -2,7 +2,6 @@ package crypt
 
 import (
 	"crypto/rsa"
-	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
@@ -137,7 +136,4 @@ func PublicKeyToBytes(pub *rsa.PublicKey) ([]byte, error) {
 	})
 
 	return pubBytes, nil
-
-
-	tls.X509KeyPair()
 }
