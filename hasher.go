@@ -90,14 +90,14 @@ func generateRandomBytes(n int) ([]byte, error) {
 }
 
 func base64Encode(src []byte) []byte {
-	buf := make([]byte, base64.StdEncoding.EncodedLen(len(src)))
-	base64.StdEncoding.Encode(buf, src)
+	buf := make([]byte, base64.URLEncoding.EncodedLen(len(src)))
+	base64.URLEncoding.Encode(buf, src)
 	return buf
 }
 
 func base64Decode(src []byte) ([]byte, error) {
-	buf := make([]byte, base64.StdEncoding.DecodedLen(len(src)))
-	n, err := base64.StdEncoding.Decode(buf, src)
+	buf := make([]byte, base64.URLEncoding.DecodedLen(len(src)))
+	n, err := base64.URLEncoding.Decode(buf, src)
 	if err != nil {
 		return nil, errors.Wrapf(err, "succeed only %d bytes, failed to decode base64 string %s", n, string(src))
 	}
