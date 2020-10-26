@@ -6,12 +6,14 @@ import (
 	"crypto/rsa"
 	"testing"
 
+	fuzz "github.com/google/gofuzz"
 	"github.com/stretchr/testify/require"
 )
 
 func TestHybridEncrypter(t *testing.T) {
 	enc := NewHybridEncrypter(testGenerateKeyPair(t, 2048))
-	plain := []byte("sensitive plain")
+	var plain []byte
+	fuzz.New().NumElements(1, 1000000).Fuzz(&plain)
 	encoded, err := enc.Encrypt(plain)
 	require.NoError(t, err, "failed to encrypt")
 	decrypted, err := enc.Decrypt(encoded)

@@ -39,7 +39,7 @@ func (d *HybridDecrypter) Decrypt(encrypted []byte) ([]byte, error) {
 
 	textStart := aesKeyLength + gcm.NonceSize()
 	// cipherText[:0] reuses allocated slice
-	plainText, err := gcm.Open(cipherText[:0], cipherText[aesKeyLength:textStart], cipherText[textStart:], nil)
+	plainText, err := gcm.Open([]byte{}, cipherText[aesKeyLength:textStart], cipherText[textStart:], nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to decrypt aes data")
 	}
@@ -76,13 +76,13 @@ func (e *HybridEncrypter) Encrypt(plain []byte) ([]byte, error) {
 		return nil, errors.Wrapf(err, "failed to generate nonce for aes gcm cipher")
 	}
 
-	ciphed := gcm.Seal(nonce, nonce, plain, nil)
+	cipherText := gcm.Seal([]byte{}, nonce, plain, nil)
 
 	encryptedAes, err := rsa.EncryptOAEP(hash, rand.Reader, e.publicKey, aesKey, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to encrypt aes key with public key")
 	}
-	return base64Encode(append(encryptedAes, ciphed...)), nil
+	return base64Encode(append(encryptedAes, append(nonce, cipherText...)...)), nil
 }
 
 func NewHybridDecrypter(privateKey *rsa.PrivateKey) *HybridDecrypter {
