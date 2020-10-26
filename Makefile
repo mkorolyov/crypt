@@ -1,7 +1,9 @@
-.PHONY: compile test
+.PHONY: check test
+COVERAGE_FILE ?= coverage.txt
 
-compile:
-	go build -v ./...
+check:
+	go vet ./...
+	golangci-lint run
 
 test:
-	go test -race -v ./...
+	go test -v -race -coverprofile=${COVERAGE_FILE} -covermode=atomic ./...
