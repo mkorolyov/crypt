@@ -7,5 +7,5 @@ require (
 	github.com/google/gofuzz v1.0.0
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.4.0
-	golang.org/x/crypto v0.1.0
+	golang.org/x/crypto v0.17.0
 )
